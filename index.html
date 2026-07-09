@@ -114,7 +114,6 @@
 <body>
 
 <div class="container">
-    <!-- מסך בחירת משתמש -->
     <div id="loginScreen" class="login-screen">
         <h2>מי אתם?</h2>
         <select id="userSelect" onchange="loginUser()">
@@ -130,7 +129,6 @@
         </select>
     </div>
 
-    <!-- התוכן המרכזי של האתר -->
     <div id="mainContent" class="main-content">
         <button class="logout-btn" onclick="logoutUser()">החלף משתמש</button>
         <h1 id="welcomeMessage">שלום</h1>
@@ -138,7 +136,7 @@
         <h2>הוספת הוצאה חדשה</h2>
         <form id="expenseForm">
             <label>שם האירוע / המוצר:</label>
-            <input type="text" id="eventName" required placeholder="לדוגמה: קניות, מתנה סודית...">
+            <input type="text" id="eventName" required placeholder="לדוגמה: קניות, מתנה...">
 
             <label>מי שילם?</label>
             <select id="payer" required>
@@ -155,7 +153,7 @@
             <label>סכום כולל (ב-₪):</label>
             <input type="number" id="amount" step="0.01" required placeholder="0.00">
 
-            <label>מי משתתף בהוצאה? (מי שלא מסומן, לא יראה את האירוע כלל)</label>
+            <label>מי משתתף בהוצאה? (מי שלא מסומן, האירוע יוסתר ממנו)</label>
             <div class="checkbox-group">
                 <div class="checkbox-item"><input type="checkbox" class="participant" value="חיים" checked> <span>חיים</span></div>
                 <div class="checkbox-item"><input type="checkbox" class="participant" value="שמוליק ואסתי" checked> <span>שמוליק ואסתי</span></div>
@@ -171,7 +169,7 @@
         </form>
 
         <div class="summary-box">
-            <h2>מצב החשבון שלך (לפי אירועים גלויים)</h2>
+            <h2>מצב החשבון הכללי בקבוצה</h2>
             <div id="balanceStatus">טוען נתונים...</div>
         </div>
 
@@ -192,7 +190,7 @@
 </div>
 
 <script>
-    // קישור ה-Web App של גוגל שיטס שלך
+    // הקישור שלך מגוגל שיטס (הדביקי בתוך הגרשיים)
     const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzpSn8nBTnZp-CTQ3NZ4YwN0q8WOMwXXz9cafc94egY1eADK-93Li7qTTya623itamKVQ/exec"; 
     
     let currentUser = "";
@@ -297,32 +295,19 @@
         const tbody = document.getElementById("tableBody");
         tbody.innerHTML = "";
 
-        // איפוס מאזן לכל השמות ברשימה
+        // המאזן הכללי המקורי - מחשב תמיד את כלל האירועים של כולם!
         let balances = {};
         allUsers.forEach(u => balances[u] = 0);
 
-        // סינון אירועים: מי שלא חלק מהמשתתפים ולא שילם, לא יראה את השורה הזו בכלל
-        const filteredData = allData.filter(row => {
+        allData.forEach(row => {
+            const amount = parseFloat(row.amount);
             const rowPayer = row.payer;
             const rowParticipants = row.participants ? row.participants.split(",") : [];
-            return (rowPayer === currentUser || rowParticipants.includes(currentUser));
-        });
-
-        if (filteredData.length === 0) {
-            document.getElementById("loadingText").innerText = "אין עדיין הוצאות גלויות עבורכם.";
-            document.getElementById("expensesTable").style.display = "none";
-            updateBalanceUI(balances);
-            return;
-        }
-
-        filteredData.forEach(row => {
-            const amount = parseFloat(row.amount);
-            const rowParticipants = row.participants ? row.participants.split(",") : [];
             
-            // חישוב החלוקה רק לפי מי שרשום באירוע הגלוי
+            // חישוב המאזן המלא לכולם ברקע
             const share = amount / rowParticipants.length;
-            if (balances[row.payer] !== undefined) {
-                balances[row.payer] += amount;
+            if (balances[rowPayer] !== undefined) {
+                balances[rowPayer] += amount;
             }
             rowParticipants.forEach(p => {
                 if (balances[p] !== undefined) {
@@ -330,14 +315,17 @@
                 }
             });
 
-            const tr = document.createElement("tr");
-            tr.innerHTML = `
-                <td>${row.eventName}</td>
-                <td>${row.payer}</td>
-                <td>₪${amount.toFixed(2)}</td>
-                <td>${rowParticipants.join(", ")}</td>
-            `;
-            tbody.appendChild(tr);
+            // הפילטר הסודי: השורה תתווסף לטבלה במסך רק אם המשתמש הנוכחי שילם או משתתף בה
+            if (rowPayer === currentUser || rowParticipants.includes(currentUser)) {
+                const tr = document.createElement("tr");
+                tr.innerHTML = `
+                    <td>${row.eventName}</td>
+                    <td>${rowPayer}</td>
+                    <td>₪${amount.toFixed(2)}</td>
+                    <td>${rowParticipants.join(", ")}</td>
+                `;
+                tbody.appendChild(tr);
+            }
         });
 
         document.getElementById("loadingText").style.display = "none";
@@ -348,6 +336,8 @@
 
     function updateBalanceUI(balances) {
         const balanceDiv = document.getElementById("balanceStatus");
+        
+        // מציג לכל משתמש בדיוק את המצב הכללי שלו בקבוצה, כולל הכל
         const myBalance = balances[currentUser] || 0;
         
         if (Math.abs(myBalance) < 0.1) {
