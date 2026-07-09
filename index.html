@@ -5,119 +5,35 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ניהול הוצאות משפחתי</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f7f6;
-            margin: 0;
-            padding: 20px;
-            color: #333;
-        }
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            background: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-        }
-        h1, h2 {
-            text-align: center;
-            color: #2c3e50;
-        }
-        .login-screen {
-            text-align: center;
-            padding: 4px 0;
-            margin-bottom: 20px;
-            border-bottom: 2px solid #eee;
-        }
-        select, input[type="text"], input[type="number"] {
-            width: 100%;
-            padding: 10px;
-            margin: 10px 0;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            box-sizing: border-box;
-            font-size: 16px;
-        }
-        .main-content {
-            display: none;
-        }
-        .checkbox-group {
-            margin: 10px 0;
-            padding: 10px;
-            background: #f9f9f9;
-            border-radius: 4px;
-        }
-        .checkbox-item {
-            margin: 8px 0;
-            display: flex;
-            align-items: center;
-        }
-        .checkbox-item input {
-            margin-left: 10px;
-            transform: scale(1.2);
-        }
-        button {
-            background-color: #2ecc71;
-            color: white;
-            padding: 12px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            width: 100%;
-            font-size: 16px;
-            font-weight: bold;
-        }
-        button:hover {
-            background-color: #27ae60;
-        }
-        .logout-btn {
-            background-color: #e74c3c;
-            width: auto;
-            padding: 5px 10px;
-            font-size: 14px;
-            float: left;
-        }
-        .logout-btn:hover {
-            background-color: #c0392b;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-        th, td {
-            border: 1px solid #ddd;
-            padding: 12px;
-            text-align: right;
-        }
-        th {
-            background-color: #34495e;
-            color: white;
-        }
-        tr:nth-child(even) {
-            background-color: #f9f9f9;
-        }
-        .summary-box {
-            background: #ecf0f1;
-            padding: 15px;
-            border-radius: 4px;
-            margin-top: 20px;
-        }
-        .loading {
-            text-align: center;
-            color: #7f8c8d;
-            font-style: italic;
-        }
+        body { font-family: Arial, sans-serif; background-color: #f4f7f6; margin: 0; padding: 20px; color: #333; }
+        .container { max-width: 800px; margin: 0 auto; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        h1, h2 { text-align: center; color: #2c3e50; }
+        select, input[type="text"], input[type="number"] { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 16px; }
+        .checkbox-group { margin: 10px 0; padding: 10px; background: #f9f9f9; border-radius: 4px; }
+        .checkbox-item { margin: 8px 0; display: flex; align-items: center; }
+        .checkbox-item input { margin-left: 10px; transform: scale(1.2); }
+        button { background-color: #2ecc71; color: white; padding: 12px; border: none; border-radius: 4px; cursor: pointer; width: 100%; font-size: 16px; font-weight: bold; }
+        button:hover { background-color: #27ae60; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #ddd; padding: 12px; text-align: right; }
+        th { background-color: #34495e; color: white; }
+        tr:nth-child(even) { background-color: #f9f9f9; }
+        .summary-box { background: #ecf0f1; padding: 15px; border-radius: 4px; margin-top: 20px; }
+        .loading { text-align: center; color: #7f8c8d; font-style: italic; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <div id="loginScreen" class="login-screen">
-        <h2>מי אתם?</h2>
-        <select id="userSelect" onchange="loginUser()">
-            <option value="">בחר/י שם מהרשימה...</option>
+    <h1>ניהול הוצאות משפחתי</h1>
+    
+    <h2>הוספת הוצאה חדשה</h2>
+    <form id="expenseForm">
+        <label>שם האירוע / המוצר:</label>
+        <input type="text" id="eventName" required placeholder="לדוגמה: קניות, מתנה...">
+
+        <label>מי שילם?</label>
+        <select id="payer" required>
             <option value="חיים">חיים</option>
             <option value="שמוליק ואסתי">שמוליק ואסתי</option>
             <option value="אליהו ושרה">אליהו ושרה</option>
@@ -127,109 +43,58 @@
             <option value="רחלי">רחלי</option>
             <option value="דניאל">דניאל</option>
         </select>
-    </div>
 
-    <div id="mainContent" class="main-content">
-        <button class="logout-btn" onclick="logoutUser()">החלף משתמש</button>
-        <h1 id="welcomeMessage">שלום</h1>
-        
-        <h2>הוספת הוצאה חדשה</h2>
-        <form id="expenseForm">
-            <label>שם האירוע / המוצר:</label>
-            <input type="text" id="eventName" required placeholder="לדוגמה: קניות, מתנה...">
+        <label>סכום כולל (ב-₪):</label>
+        <input type="number" id="amount" step="0.01" required placeholder="0.00">
 
-            <label>מי שילם?</label>
-            <select id="payer" required>
-                <option value="חיים">חיים</option>
-                <option value="שמוליק ואסתי">שמוליק ואסתי</option>
-                <option value="אליהו ושרה">אליהו ושרה</option>
-                <option value="צבי ואילה">צבי ואילה</option>
-                <option value="אברימי ושני">אברימי ושני</option>
-                <option value="יעקב ושני">יעקב ושני</option>
-                <option value="רחלי">רחלי</option>
-                <option value="דניאל">דניאל</option>
-            </select>
-
-            <label>סכום כולל (ב-₪):</label>
-            <input type="number" id="amount" step="0.01" required placeholder="0.00">
-
-            <label>מי משתתף בהוצאה? (מי שלא מסומן, האירוע יוסתר ממנו)</label>
-            <div class="checkbox-group">
-                <div class="checkbox-item"><input type="checkbox" class="participant" value="חיים" checked> <span>חיים</span></div>
-                <div class="checkbox-item"><input type="checkbox" class="participant" value="שמוליק ואסתי" checked> <span>שמוליק ואסתי</span></div>
-                <div class="checkbox-item"><input type="checkbox" class="participant" value="אליהו ושרה" checked> <span>אליהו ושרה</span></div>
-                <div class="checkbox-item"><input type="checkbox" class="participant" value="צבי ואילה" checked> <span>צבי ואילה</span></div>
-                <div class="checkbox-item"><input type="checkbox" class="participant" value="אברימי ושני" checked> <span>אברימי ושני</span></div>
-                <div class="checkbox-item"><input type="checkbox" class="participant" value="יעקב ושני" checked> <span>יעקב ושני</span></div>
-                <div class="checkbox-item"><input type="checkbox" class="participant" value="רחלי" checked> <span>רחלי</span></div>
-                <div class="checkbox-item"><input type="checkbox" class="participant" value="דניאל" checked> <span>דניאל</span></div>
-            </div>
-
-            <button type="submit" id="submitBtn">שמור הוצאה</button>
-        </form>
-
-        <div class="summary-box">
-            <h2>מצב החשבון הכללי בקבוצה</h2>
-            <div id="balanceStatus">טוען נתונים...</div>
+        <label>מי משתתף בהוצאה?</label>
+        <div class="checkbox-group">
+            <div class="checkbox-item"><input type="checkbox" class="participant" value="חיים" checked> <span>חיים</span></div>
+            <div class="checkbox-item"><input type="checkbox" class="participant" value="שמוליק ואסתי" checked> <span>שמוליק ואסתי</span></div>
+            <div class="checkbox-item"><input type="checkbox" class="participant" value="אליהו ושרה" checked> <span>אליהו ושרה</span></div>
+            <div class="checkbox-item"><input type="checkbox" class="participant" value="צבי ואילה" checked> <span>צבי ואילה</span></div>
+            <div class="checkbox-item"><input type="checkbox" class="participant" value="אברימי ושני" checked> <span>אברימי ושני</span></div>
+            <div class="checkbox-item"><input type="checkbox" class="participant" value="יעקב ושני" checked> <span>יעקב ושני</span></div>
+            <div class="checkbox-item"><input type="checkbox" class="participant" value="רחלי" checked> <span>רחלי</span></div>
+            <div class="checkbox-item"><input type="checkbox" class="participant" value="דניאל" checked> <span>דניאל</span></div>
         </div>
 
-        <h2>היסטוריית הוצאות</h2>
-        <div id="loadingText" class="loading">טוען את רשימת ההוצאות...</div>
-        <table id="expensesTable" style="display:none;">
-            <thead>
-                <tr>
-                    <th>אירוע</th>
-                    <th>שילם</th>
-                    <th>סכום</th>
-                    <th>משתתפים</th>
-                </tr>
-            </thead>
-            <tbody id="tableBody"></tbody>
-        </table>
+        <button type="submit" id="submitBtn">שמור הוצאה</button>
+    </form>
+
+    <div class="summary-box">
+        <h2>מצב החשבון הכללי בקבוצה</h2>
+        <div id="balanceStatus">טוען נתונים...</div>
     </div>
+
+    <h2>היסטוריית הוצאות</h2>
+    <div id="loadingText" class="loading">טוען את רשימת ההוצאות...</div>
+    <table id="expensesTable" style="display:none;">
+        <thead>
+            <tr>
+                <th>אירוע</th>
+                <th>שילם</th>
+                <th>סכום</th>
+                <th>משתתפים</th>
+            </tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+    </table>
 </div>
 
 <script>
-    // הקישור שלך מגוגל שיטס (הדביקי בתוך הגרשיים)
-    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzu_WUT00lpZTLvFBBsvUYiesdmcIBq5C4DTHMLDSN8mgYRO3lqdJ4F4qKhXcINQy0fXg/exec"; 
+    // הקישור הישן והטוב שלך
+    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzyON3YIT0LIK9ZmhD59ZhtJ1gODMJ8QD5mlFtE-0HnWwFs2XJ9T6jZ_XedUTGoVg7fig/exec"; 
     
-    let currentUser = "";
     let allData = [];
     const allUsers = ["חיים", "שמוליק ואסתי", "אליהו ושרה", "צבי ואילה", "אברימי ושני", "יעקב ושני", "רחלי", "דניאל"];
 
     window.onload = function() {
-        const savedUser = localStorage.getItem("family_user");
-        if (savedUser && allUsers.includes(savedUser)) {
-            document.getElementById("userSelect").value = savedUser;
-            loginUser();
-        }
-    }
-
-    function loginUser() {
-        const select = document.getElementById("userSelect");
-        currentUser = select.value;
-        if (!currentUser) return;
-
-        localStorage.setItem("family_user", currentUser);
-        document.getElementById("loginScreen").style.display = "none";
-        document.getElementById("mainContent").style.display = "block";
-        document.getElementById("welcomeMessage").innerText = "שלום, " + currentUser;
-        
-        document.getElementById("payer").value = currentUser;
-
         fetchData();
-    }
-
-    function logoutUser() {
-        localStorage.removeItem("family_user");
-        document.getElementById("userSelect").value = "";
-        document.getElementById("loginScreen").style.display = "block";
-        document.getElementById("mainContent").style.display = "none";
     }
 
     document.getElementById("expenseForm").addEventListener("submit", function(e) {
         e.preventDefault();
-        
         const submitBtn = document.getElementById("submitBtn");
         submitBtn.disabled = true;
         submitBtn.innerText = "שומר...";
@@ -239,24 +104,9 @@
         const amount = parseFloat(document.getElementById("amount").value);
         
         let participants = [];
-        document.querySelectorAll(".participant:checked").forEach(cb => {
-            participants.push(cb.value);
-        });
+        document.querySelectorAll(".participant:checked").forEach(cb => { participants.push(cb.value); });
 
-        if (participants.length === 0) {
-            alert("חובה לבחור לפחות משתתף אחד בהוצאה!");
-            submitBtn.disabled = false;
-            submitBtn.innerText = "שמור הוצאה";
-            return;
-        }
-
-        const payload = {
-            action: "add",
-            eventName: eventName,
-            payer: payer,
-            amount: amount,
-            participants: participants.join(",")
-        };
+        const payload = { action: "add", eventName: eventName, payer: payer, amount: amount, participants: participants.join(",") };
 
         fetch(WEB_APP_URL, {
             method: "POST",
@@ -266,7 +116,6 @@
         }).then(() => {
             alert("ההוצאה נשמרה בהצלחה!");
             document.getElementById("expenseForm").reset();
-            document.getElementById("payer").value = currentUser;
             submitBtn.disabled = false;
             submitBtn.innerText = "שמור הוצאה";
             fetchData();
@@ -278,24 +127,18 @@
     });
 
     function fetchData() {
-        if (!currentUser) return;
-
         fetch(WEB_APP_URL + "?action=get")
         .then(res => res.json())
         .then(data => {
             allData = data;
             renderData();
         })
-        .catch(err => {
-            console.error("שגיאה בקבלת נתונים", err);
-        });
+        .catch(err => { console.error("שגיאה בקבלת נתונים", err); });
     }
 
     function renderData() {
         const tbody = document.getElementById("tableBody");
         tbody.innerHTML = "";
-
-        // המאזן הכללי המקורי - מחשב תמיד את כלל האירועים של כולם!
         let balances = {};
         allUsers.forEach(u => balances[u] = 0);
 
@@ -304,28 +147,15 @@
             const rowPayer = row.payer;
             const rowParticipants = row.participants ? row.participants.split(",") : [];
             
-            // חישוב המאזן המלא לכולם ברקע
             const share = amount / rowParticipants.length;
-            if (balances[rowPayer] !== undefined) {
-                balances[rowPayer] += amount;
-            }
+            if (balances[rowPayer] !== undefined) balances[rowPayer] += amount;
             rowParticipants.forEach(p => {
-                if (balances[p] !== undefined) {
-                    balances[p] -= share;
-                }
+                if (balances[p] !== undefined) balances[p] -= share;
             });
 
-            // הפילטר הסודי: השורה תתווסף לטבלה במסך רק אם המשתמש הנוכחי שילם או משתתף בה
-            if (rowPayer === currentUser || rowParticipants.includes(currentUser)) {
-                const tr = document.createElement("tr");
-                tr.innerHTML = `
-                    <td>${row.eventName}</td>
-                    <td>${rowPayer}</td>
-                    <td>₪${amount.toFixed(2)}</td>
-                    <td>${rowParticipants.join(", ")}</td>
-                `;
-                tbody.appendChild(tr);
-            }
+            const tr = document.createElement("tr");
+            tr.innerHTML = `<td>${row.eventName}</td><td>${rowPayer}</td><td>₪${amount.toFixed(2)}</td><td>${rowParticipants.join(", ")}</td>`;
+            tbody.appendChild(tr);
         });
 
         document.getElementById("loadingText").style.display = "none";
@@ -336,22 +166,22 @@
 
     function updateBalanceUI(balances) {
         const balanceDiv = document.getElementById("balanceStatus");
-        
-        // מציג לכל משתמש בדיוק את המצב הכללי שלו בקבוצה, כולל הכל
-        const myBalance = balances[currentUser] || 0;
-        
-        if (Math.abs(myBalance) < 0.1) {
-            balanceDiv.innerHTML = "<strong>את/ה מאוזן/ת! אין לך חובות או יתרות לקבל.</strong>";
-        } else if (myBalance > 0) {
-            balanceDiv.innerHTML = `מגיעה לך יתרה כוללת של: <span style="color:#27ae60; font-weight:bold; font-size: 18px;">₪${myBalance.toFixed(2)}</span> משאר חברי הקבוצה.`;
-        } else {
-            balanceDiv.innerHTML = `עלייך להחזיר סך הכל: <span style="color:#e74c3c; font-weight:bold; font-size: 18px;">₪${Math.abs(myBalance).toFixed(2)}</span> לקבוצה.`;
+        let html = "<ul>";
+        for (let user in balances) {
+            const b = balances[user];
+            if (b > 0) {
+                html += `<li><strong>${user}</strong>: מגיע לו <span style="color:#27ae60;">₪${b.toFixed(2)}</span></li>`;
+            } else if (b < 0) {
+                html += `<li><strong>${user}</strong>: חייב <span style="color:#e74c3c;">₪${Math.abs(b).toFixed(2)}</span></li>`;
+            } else {
+                html += `<li><strong>${user}</strong>: מאוזן</li>`;
+            }
         }
+        html += "</ul>";
+        balanceDiv.innerHTML = html;
     }
 
-    setInterval(() => {
-        if (currentUser) fetchData();
-    }, 15000);
+    setInterval(fetchData, 15000);
 </script>
 
 </body>
