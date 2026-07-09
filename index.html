@@ -3,593 +3,366 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ניהול כספים קבוצתי - מבוסס גוגל שיטס</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Rubik:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
-    
+    <title>ניהול הוצאות משפחתי</title>
     <style>
         body {
-            font-family: 'Rubik', 'Inter', system-ui, -apple-system, sans-serif;
-            background: linear-gradient(135deg, #f0f4f8 0%, #e6eef4 100%);
+            font-family: Arial, sans-serif;
+            background-color: #f4f7f6;
+            margin: 0;
+            padding: 20px;
+            color: #333;
         }
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+        h1, h2 {
+            text-align: center;
+            color: #2c3e50;
+        }
+        .login-screen {
+            text-align: center;
+            padding: 4px 0;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #eee;
+        }
+        select, input[type="text"], input[type="number"] {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+        .main-content {
+            display: none;
+        }
+        .checkbox-group {
+            margin: 10px 0;
+            padding: 10px;
+            background: #f9f9f9;
+            border-radius: 4px;
+        }
+        .checkbox-item {
+            margin: 8px 0;
+            display: flex;
+            align-items: center;
+        }
+        .checkbox-item input {
+            margin-left: 10px;
+            transform: scale(1.2);
+        }
+        button {
+            background-color: #2ecc71;
+            color: white;
+            padding: 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 100%;
+            font-size: 16px;
+            font-weight: bold;
+        }
+        button:hover {
+            background-color: #27ae60;
+        }
+        .logout-btn {
+            background-color: #e74c3c;
+            width: auto;
+            padding: 5px 10px;
+            font-size: 14px;
+            float: left;
+        }
+        .logout-btn:hover {
+            background-color: #c0392b;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: right;
+        }
+        th {
+            background-color: #34495e;
+            color: white;
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        .summary-box {
+            background: #ecf0f1;
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 20px;
+        }
+        .loading {
+            text-align: center;
+            color: #7f8c8d;
+            font-style: italic;
+        }
     </style>
 </head>
-<body class="min-height-screen text-slate-800 p-3 sm:p-6">
+<body>
 
-<div class="container max-w-2xl mx-auto">
-    <header class="text-center mb-8 mt-4">
-        <h1 class="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight flex items-center justify-center gap-3">
-            <span>📊</span> ניהול כספים קבוצתי
-        </h1>
-        <p class="text-slate-500 mt-2 font-medium">מעקב הוצאות חכם, הוגן ופשוט למשפחה - מסונכרן לגוגל שיטס</p>
-    </header>
-
-    <main class="space-y-6">
-        <form onsubmit="event.preventDefault(); addExpense(); return false;" class="bg-white rounded-2xl p-6 shadow-md border border-slate-100 relative overflow-hidden">
-            <div class="absolute top-0 right-0 left-0 h-1.5 bg-gradient-to-r from-indigo-500 to-purple-600"></div>
-            
-            <div class="flex items-center justify-between mb-5">
-                <span id="sync-status" class="text-xs font-bold text-amber-700 bg-amber-50 px-3 py-1 rounded-full flex items-center gap-1">
-                    <span class="w-2 h-2 bg-amber-500 rounded-full animate-pulse"></span>
-                    מתחבר לגיליון גוגל... 🔄
-                </span>
-                <button type="button" onclick="resetAllDataWithConfirmation()" class="text-xs text-rose-600 hover:text-rose-800 font-semibold transition-colors">
-                    אתחול הכל 🗑️
-                </button>
-            </div>
-
-            <div class="mb-5">
-                <label for="event-name" class="block text-sm font-bold text-slate-700 mb-2">שם האירוע / הוצאה:</label>
-                <input type="text" id="event-name" placeholder="למשל: מתנה ללידה, מתנה להורים, מפגשים..." 
-                       class="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50/50 focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 transition-all outline-none text-base">
-            </div>
-
-            <div class="mb-5">
-                <label class="block text-sm font-bold text-slate-700 mb-2">משתתפים באירוע (מי נהנה ממנו?):</label>
-                <div class="flex flex-wrap gap-2 mb-1">
-                    <button type="button" onclick="selectAllParticipants(true)" class="text-xs text-indigo-600 hover:text-indigo-800 font-bold">בחר הכל</button>
-                    <span class="text-slate-300 text-xs">|</span>
-                    <button type="button" onclick="selectAllParticipants(false)" class="text-xs text-slate-500 hover:text-slate-700 font-bold">בטל הכל</button>
-                </div>
-                <div id="participants-list" class="grid grid-cols-2 sm:grid-cols-3 gap-2"></div>
-            </div>
-
-            <div class="mb-6">
-                <label class="block text-sm font-bold text-slate-700 mb-2">מי שילם בפועל וכמה? (אפשר כמה אנשים):</label>
-                <div id="payers-list" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
-            </div>
-
-            <div class="flex gap-3 pt-2">
-                <button type="submit" id="submit-btn" class="w-full bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white font-bold py-3.5 px-6 rounded-xl shadow-lg shadow-indigo-100 hover:shadow-xl transition-all flex items-center justify-center gap-2 text-base">
-                    <span>💾</span> שמור הוצאה
-                </button>
-            </div>
-        </form>
-
-        <div class="bg-white rounded-2xl p-6 shadow-md border border-slate-100">
-            <h2 class="text-xl font-bold text-slate-900 mb-4 flex items-center gap-2">
-                <span>📊</span> מצב החשבון הנוכחי
-            </h2>
-            
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                    <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">יתרות אישיות</h3>
-                    <div id="girls-balances-list" class="space-y-2"></div>
-                </div>
-
-                <div>
-                    <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">איך מתאזנים? (מי מחזיר למי)</h3>
-                    <div id="repayments-list" class="space-y-2"></div>
-                </div>
-            </div>
-        </div>
-
-        <div class="bg-white rounded-2xl p-6 shadow-md border border-slate-100">
-            <button type="button" onclick="toggleHistory()" class="w-full flex items-center justify-between text-lg font-bold text-slate-900 focus:outline-none">
-                <span class="flex items-center gap-2">🕒 היסטוריית פעולות קבוצתית (<span id="history-count">0</span>)</span>
-                <span id="history-toggle-icon" class="text-slate-400 transition-transform duration-200 transform rotate-180">▲</span>
-            </button>
-            
-            <div id="history-section" class="mt-4 pt-4 border-t border-slate-100 space-y-3 max-h-96 overflow-y-auto pr-1">
-                <div id="history-list" class="space-y-3"></div>
-            </div>
-        </div>
-    </main>
-
-    <div id="custom-alert" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
-        <div class="bg-white rounded-2xl max-w-sm w-full p-6 shadow-2xl border border-slate-100 transform transition-all scale-95 opacity-0 duration-200" id="alert-content">
-            <div class="text-center">
-                <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-amber-50 text-amber-600 mb-4 text-xl" id="alert-icon">⚠️</div>
-                <h3 class="text-lg font-bold text-slate-900 mb-2" id="alert-title">שימי לב</h3>
-                <p class="text-slate-600 text-sm mb-6" id="alert-message"></p>
-                <button type="button" onclick="closeAlert()" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-3 px-4 rounded-xl transition-all">הבנתי, תודה</button>
-            </div>
-        </div>
+<div class="container">
+    <!-- מסך בחירת משתמש -->
+    <div id="loginScreen" class="login-screen">
+        <h2>מי אתם?</h2>
+        <select id="userSelect" onchange="loginUser()">
+            <option value="">בחר/י שם מהרשימה...</option>
+            <option value="חיים">חיים</option>
+            <option value="שמוליק ואסתי">שמוליק ואסתי</option>
+            <option value="אליהו ושרה">אליהו ושרה</option>
+            <option value="צבי ואילה">צבי ואילה</option>
+            <option value="אברימי ושני">אברימי ושני</option>
+            <option value="יעקב ושני">יעקב ושני</option>
+            <option value="רחלי">רחלי</option>
+            <option value="דניאל">דניאל</option>
+        </select>
     </div>
 
-    <div id="custom-confirm" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
-        <div class="bg-white rounded-2xl max-w-sm w-full p-6 shadow-2xl border border-slate-100 transform transition-all scale-95 opacity-0 duration-200" id="confirm-content">
-            <div class="text-center">
-                <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-indigo-50 text-indigo-600 mb-4 text-xl" id="confirm-icon">↩️</div>
-                <h3 class="text-lg font-bold text-slate-900 mb-2" id="confirm-title">האם לבטל?</h3>
-                <p class="text-slate-600 text-sm mb-6" id="confirm-message"></p>
-                <div class="flex gap-3">
-                    <button id="confirm-yes-btn" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded-xl transition-all">כן, בצע</button>
-                    <button type="button" onclick="closeConfirm()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-3 px-4 rounded-xl transition-all">ביטול</button>
-                </div>
+    <!-- התוכן המרכזי של האתר -->
+    <div id="mainContent" class="main-content">
+        <button class="logout-btn" onclick="logoutUser()">החלף משתמש</button>
+        <h1 id="welcomeMessage">שלום</h1>
+        
+        <h2>הוספת הוצאה חדשה</h2>
+        <form id="expenseForm">
+            <label>שם האירוע / המוצר:</label>
+            <input type="text" id="eventName" required placeholder="לדוגמה: קניות, מתנה סודית...">
+
+            <label>מי שילם?</label>
+            <select id="payer" required>
+                <option value="חיים">חיים</option>
+                <option value="שמוליק ואסתי">שמוליק ואסתי</option>
+                <option value="אליהו ושרה">אליהו ושרה</option>
+                <option value="צבי ואילה">צבי ואילה</option>
+                <option value="אברימי ושני">אברימי ושני</option>
+                <option value="יעקב ושני">יעקב ושני</option>
+                <option value="רחלי">רחלי</option>
+                <option value="דניאל">דניאל</option>
+            </select>
+
+            <label>סכום כולל (ב-₪):</label>
+            <input type="number" id="amount" step="0.01" required placeholder="0.00">
+
+            <label>מי משתתף בהוצאה? (מי שלא מסומן, לא יראה את האירוע כלל)</label>
+            <div class="checkbox-group">
+                <div class="checkbox-item"><input type="checkbox" class="participant" value="חיים" checked> <span>חיים</span></div>
+                <div class="checkbox-item"><input type="checkbox" class="participant" value="שמוליק ואסתי" checked> <span>שמוליק ואסתי</span></div>
+                <div class="checkbox-item"><input type="checkbox" class="participant" value="אליהו ושרה" checked> <span>אליהו ושרה</span></div>
+                <div class="checkbox-item"><input type="checkbox" class="participant" value="צבי ואילה" checked> <span>צבי ואילה</span></div>
+                <div class="checkbox-item"><input type="checkbox" class="participant" value="אברימי ושני" checked> <span>אברימי ושני</span></div>
+                <div class="checkbox-item"><input type="checkbox" class="participant" value="יעקב ושני" checked> <span>יעקב ושני</span></div>
+                <div class="checkbox-item"><input type="checkbox" class="participant" value="רחלי" checked> <span>רחלי</span></div>
+                <div class="checkbox-item"><input type="checkbox" class="participant" value="דניאל" checked> <span>דניאל</span></div>
             </div>
+
+            <button type="submit" id="submitBtn">שמור הוצאה</button>
+        </form>
+
+        <div class="summary-box">
+            <h2>מצב החשבון שלך (לפי אירועים גלויים)</h2>
+            <div id="balanceStatus">טוען נתונים...</div>
         </div>
+
+        <h2>היסטוריית הוצאות</h2>
+        <div id="loadingText" class="loading">טוען את רשימת ההוצאות...</div>
+        <table id="expensesTable" style="display:none;">
+            <thead>
+                <tr>
+                    <th>אירוע</th>
+                    <th>שילם</th>
+                    <th>סכום</th>
+                    <th>משתתפים</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody"></tbody>
+        </table>
     </div>
 </div>
 
 <script>
-    // הכתובת של ה-Web App שלך בגוגל שיטס
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzpSn8nBTnZp-CTQ3NZ4YwN0q8WOMwXXz9cafc94egY1eADK-93Li7qTTya623itamKVQ/exec";
-
-    const girls = ["חיים", "שמוליק ואסתי", "אליהו ושרה", "צבי ואילה", "אברימי ושני", "יעקב", "רחלי", "דניאל"];
+    // קישור ה-Web App של גוגל שיטס שלך
+    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzpSn8nBTnZp-CTQ3NZ4YwN0q8WOMwXXz9cafc94egY1eADK-93Li7qTTya623itamKVQ/exec"; 
     
-    const girlStyles = {
-        "חיים": { bgClass: 'bg-rose-50 border-rose-200 text-rose-800', accent: 'bg-rose-600', text: 'text-rose-700' },
-        "שמוליק ואסתי": { bgClass: 'bg-sky-50 border-sky-200 text-sky-800', accent: 'bg-sky-600', text: 'text-sky-700' },
-        "אליהו ושרה": { bgClass: 'bg-emerald-50 border-emerald-200 text-emerald-800', accent: 'bg-emerald-600', text: 'text-emerald-700' },
-        "צבי ואילה": { bgClass: 'bg-amber-50 border-amber-200 text-amber-800', accent: 'bg-amber-600', text: 'text-amber-700' },
-        "אברימי ושני": { bgClass: 'bg-purple-50 border-purple-200 text-purple-800', accent: 'bg-purple-600', text: 'text-purple-700' },
-        "יעקב": { bgClass: 'bg-pink-50 border-pink-200 text-pink-800', accent: 'bg-pink-600', text: 'text-pink-700' },
-        "רחלי": { bgClass: 'bg-indigo-50 border-indigo-200 text-indigo-800', accent: 'bg-indigo-600', text: 'text-indigo-700' },
-        "דניאל": { bgClass: 'bg-teal-50 border-teal-200 text-teal-800', accent: 'bg-teal-600', text: 'text-teal-700' }
-    };
+    let currentUser = "";
+    let allData = [];
+    const allUsers = ["חיים", "שמוליק ואסתי", "אליהו ושרה", "צבי ואילה", "אברימי ושני", "יעקב ושני", "רחלי", "דניאל"];
 
-    let expenses = [];
-
-    function initForm() {
-        const participantsHTML = girls.map(g => {
-            const style = girlStyles[g];
-            return `
-                <label class="flex items-center gap-2 p-3 rounded-xl border ${style.bgClass} cursor-pointer hover:shadow-sm transition-all">
-                    <input type="checkbox" id="part-${g}" checked class="w-4.5 h-4.5 text-indigo-600 rounded focus:ring-indigo-400">
-                    <span class="font-bold text-sm ${style.text}">${g}</span>
-                </label>
-            `;
-        }).join('');
-        document.getElementById('participants-list').innerHTML = participantsHTML;
-
-        const payersHTML = girls.map(g => {
-            const style = girlStyles[g];
-            return `
-                <div class="flex items-center justify-between p-3 rounded-xl border ${style.bgClass}">
-                    <span class="font-bold text-sm ${style.text}">${g}</span>
-                    <div class="relative max-w-[120px]">
-                        <input type="number" id="pay-${g}" value="0" min="0" step="any" onfocus="this.select()"
-                               class="w-full pl-6 pr-3 py-1.5 rounded-lg border border-slate-200 bg-white text-left font-bold text-slate-800 outline-none focus:border-indigo-400">
-                        <span class="absolute left-2 top-1.5 text-slate-400 text-sm">₪</span>
-                    </div>
-                </div>
-            `;
-        }).join('');
-        document.getElementById('payers-list').innerHTML = payersHTML;
-    }
-
-    function selectAllParticipants(isChecked) {
-        girls.forEach(g => {
-            const el = document.getElementById(`part-${g}`);
-            if (el) el.checked = isChecked;
-        });
-    }
-
-    // טעינת נתונים מגוגל שיטס
-    function loadDataFromSheets() {
-        updateSyncStatus("loading");
-        fetch(SCRIPT_URL)
-            .then(res => res.json())
-            .then(data => {
-                if (Array.isArray(data)) {
-                    expenses = data;
-                    calculateAndRender();
-                    updateSyncStatus("success");
-                } else {
-                    updateSyncStatus("error");
-                }
-            })
-            .catch(err => {
-                console.error(err);
-                updateSyncStatus("error");
-            });
-    }
-
-    function updateSyncStatus(status) {
-        const statusEl = document.getElementById("sync-status");
-        if (status === "loading") {
-            statusEl.className = "text-xs font-bold text-amber-700 bg-amber-50 px-3 py-1 rounded-full flex items-center gap-1";
-            statusEl.innerHTML = `<span class="w-2 h-2 bg-amber-500 rounded-full animate-pulse"></span> מעדכן נתונים מגוגל שיטס...`;
-        } else if (status === "success") {
-            statusEl.className = "text-xs font-bold text-emerald-700 bg-emerald-50 px-3 py-1 rounded-full flex items-center gap-1";
-            statusEl.innerHTML = `<span class="w-2 h-2 bg-emerald-500 rounded-full"></span> מסונכרן לגוגל שיטס ✔️`;
-        } else {
-            statusEl.className = "text-xs font-bold text-rose-700 bg-rose-50 px-3 py-1 rounded-full flex items-center gap-1";
-            statusEl.innerHTML = `<span class="w-2 h-2 bg-rose-500 rounded-full"></span> שגיאת סנכרון`;
+    window.onload = function() {
+        const savedUser = localStorage.getItem("family_user");
+        if (savedUser && allUsers.includes(savedUser)) {
+            document.getElementById("userSelect").value = savedUser;
+            loginUser();
         }
     }
 
-    function addExpense() {
-        const description = document.getElementById('event-name').value.trim() || "הוצאה ללא שם";
-        const participants = girls.filter(g => document.getElementById(`part-${g}`).checked);
+    function loginUser() {
+        const select = document.getElementById("userSelect");
+        currentUser = select.value;
+        if (!currentUser) return;
+
+        localStorage.setItem("family_user", currentUser);
+        document.getElementById("loginScreen").style.display = "none";
+        document.getElementById("mainContent").style.display = "block";
+        document.getElementById("welcomeMessage").innerText = "שלום, " + currentUser;
         
-        let payers = {};
-        let total = 0;
-        girls.forEach(g => {
-            const val = parseFloat(document.getElementById(`pay-${g}`).value) || 0;
-            if (val > 0) { 
-                payers[g] = val; 
-                total += val; 
-            }
+        document.getElementById("payer").value = currentUser;
+
+        fetchData();
+    }
+
+    function logoutUser() {
+        localStorage.removeItem("family_user");
+        document.getElementById("userSelect").value = "";
+        document.getElementById("loginScreen").style.display = "block";
+        document.getElementById("mainContent").style.display = "none";
+    }
+
+    document.getElementById("expenseForm").addEventListener("submit", function(e) {
+        e.preventDefault();
+        
+        const submitBtn = document.getElementById("submitBtn");
+        submitBtn.disabled = true;
+        submitBtn.innerText = "שומר...";
+
+        const eventName = document.getElementById("eventName").value;
+        const payer = document.getElementById("payer").value;
+        const amount = parseFloat(document.getElementById("amount").value);
+        
+        let participants = [];
+        document.querySelectorAll(".participant:checked").forEach(cb => {
+            participants.push(cb.value);
         });
 
         if (participants.length === 0) {
-            return showAlert("רגע, משהו חסר", "יש לבחור לפחות משתתפת אחת שנהנתה מההוצאה.");
-        }
-        if (total <= 0) {
-            return showAlert("סכום לא תקין", "נא להזין כמה שולם ועבור מי.");
-        }
-
-        const newExpense = { 
-            type: 'expense', 
-            description, 
-            total: Math.round(total * 100) / 100, 
-            participants, 
-            payers
-        };
-
-        const submitBtn = document.getElementById("submit-btn");
-        submitBtn.disabled = true;
-        submitBtn.innerText = "שומר בגיליון...";
-
-        fetch(SCRIPT_URL, {
-            method: "POST",
-            mode: "no-cors", // נדרש לעבודה תקינה מול Google Apps Script בדפדפן
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(newExpense)
-        })
-        .then(() => {
-            initForm();
-            document.getElementById('event-name').value = '';
+            alert("חובה לבחור לפחות משתתף אחד בהוצאה!");
             submitBtn.disabled = false;
-            submitBtn.innerHTML = "<span>💾</span> שמור הוצאה";
-            // טעינה מחדש של הנתונים כדי לראות את השורה החדשה
-            setTimeout(loadDataFromSheets, 1500);
-        })
-        .catch((err) => {
-            submitBtn.disabled = false;
-            submitBtn.innerHTML = "<span>💾</span> שמור הוצאה";
-            showAlert("שגיאה בשמירה ❌", "הנתונים לא נשמרו: " + err.message);
-        });
-    }
-
-    function recordQuickSettle(from, to, amount) {
-        showConfirm(
-            "רישום העברה כספית",
-            `האם לסמן ש${from} העבירה בפועל ${amount} ₪ ל${to}?`,
-            "🤝",
-            () => {
-                const newSettle = {
-                    type: 'settle',
-                    description: `העברה מ${from} ל${to}`,
-                    total: amount,
-                    participants: [from, to],
-                    payers: { [from]: amount }
-                };
-                
-                fetch(SCRIPT_URL, {
-                    method: "POST",
-                    mode: "no-cors",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(newSettle)
-                }).then(() => {
-                    setTimeout(loadDataFromSheets, 1500);
-                });
-            }
-        );
-    }
-
-    function resetAllDataWithConfirmation() {
-        showConfirm(
-            "אתחול הכל מחדש",
-            "פעולה זו תמחק את כל השורות בגיליון לצמיתות (למעט כותרות). האם להמשיך?",
-            "⚠️",
-            () => {
-                fetch(SCRIPT_URL, {
-                    method: "POST",
-                    mode: "no-cors",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ action: 'clearAll' })
-                }).then(() => {
-                    setTimeout(loadDataFromSheets, 1500);
-                });
-            }
-        );
-    }
-
-    function calculateAndRender() {
-        let balances = {};
-        girls.forEach(g => balances[g] = 0);
-
-        expenses.forEach(exp => {
-            if (exp.type === 'expense') {
-                const share = exp.total / exp.participants.length;
-                exp.participants.forEach(p => {
-                    if (balances[p] !== undefined) balances[p] -= share;
-                });
-                for (let payer in exp.payers) {
-                    if (balances[payer] !== undefined) balances[payer] += exp.payers[payer];
-                }
-            } else if (exp.type === 'settle') {
-                // בהעברה ישירה: מי שהעביר (from) החזיר חוב ולכן היתרה שלו עולה לכיוון 0
-                // מי שקיבל (to) קיבל כסף ולכן היתרה שלו יורדת
-                const fromP = exp.participants[0];
-                const toP = exp.participants[1];
-                if (balances[fromP] !== undefined) balances[fromP] += exp.total;
-                if (balances[toP] !== undefined) balances[toP] -= exp.total;
-            }
-        });
-
-        const balancesContainer = document.getElementById('girls-balances-list');
-        balancesContainer.innerHTML = '';
-        
-        girls.forEach(girl => {
-            const bal = Math.round(balances[girl] * 100) / 100;
-            const style = girlStyles[girl];
-            let badgeText = "";
-            let balanceColorClass = "";
-            
-            if (bal < -0.05) {
-                badgeText = `צריכ/ה להחזיר ${Math.abs(bal)} ₪`;
-                balanceColorClass = "text-rose-600 font-bold bg-rose-50 border-rose-100";
-            } else if (bal > 0.05) {
-                badgeText = `זכאי/ת לקבל ${bal} ₪`;
-                balanceColorClass = "text-emerald-700 font-bold bg-emerald-50 border-emerald-100";
-            } else {
-                badgeText = "מאוזנ/ת 🎉";
-                balanceColorClass = "text-slate-500 bg-slate-50 border-slate-100";
-            }
-
-            balancesContainer.innerHTML += `
-                <div class="flex items-center justify-between p-2.5 rounded-xl border text-sm ${balanceColorClass}">
-                    <span class="flex items-center gap-2 font-bold text-slate-800">
-                        <span class="w-2.5 h-2.5 rounded-full ${style.accent}"></span>
-                        ${girl}
-                    </span>
-                    <span>${badgeText}</span>
-                </div>
-            `;
-        });
-
-        let creditors = [];
-        let debtors = [];
-
-        for (let g in balances) {
-            let val = Math.round(balances[g] * 100) / 100;
-            if (val > 0.05) creditors.push({ name: g, amount: val });
-            else if (val < -0.05) debtors.push({ name: g, amount: Math.abs(val) });
-        }
-
-        creditors.sort((a, b) => b.amount - a.amount);
-        debtors.sort((a, b) => b.amount - a.amount);
-
-        const repaymentsContainer = document.getElementById('repayments-list');
-        repaymentsContainer.innerHTML = '';
-
-        let transactions = [];
-        let i = 0, j = 0;
-
-        // שכפול המערכים כדי לא להרוס את המקור בריצה
-        let dCopy = debtors.map(d => ({...d}));
-        let cCopy = creditors.map(c => ({...c}));
-
-        while (i < dCopy.length && j < cCopy.length) {
-            let debtor = dCopy[i];
-            let creditor = cCopy[j];
-            let amountToPay = Math.min(debtor.amount, creditor.amount);
-
-            if (amountToPay > 0.05) {
-                transactions.push({
-                    from: debtor.name,
-                    to: creditor.name,
-                    amount: Math.round(amountToPay * 100) / 100
-                });
-            }
-
-            debtor.amount -= amountToPay;
-            creditor.amount -= amountToPay;
-
-            if (debtor.amount <= 0.05) i++;
-            if (creditor.amount <= 0.05) j++;
-        }
-
-        if (transactions.length === 0) {
-            repaymentsContainer.innerHTML = `
-                <div class="p-4 bg-slate-50 rounded-xl border border-dashed border-slate-200 text-center text-slate-500 text-sm font-medium">
-                    אין חובות פעילים! הכל מאוזן קומפלט 🌳
-                </div>
-            `;
-        } else {
-            transactions.forEach(t => {
-                repaymentsContainer.innerHTML += `
-                    <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between p-3 bg-indigo-50/40 border border-indigo-100 rounded-xl text-sm gap-2">
-                        <div class="font-medium text-slate-700 flex items-center gap-1.5 flex-wrap">
-                            <strong class="${girlStyles[t.from].text}">${t.from}</strong> 
-                            <span>מחזירה ל-</span> 
-                            <strong class="${girlStyles[t.to].text}">${t.to}</strong>
-                            <span class="bg-indigo-100 text-indigo-800 font-extrabold px-2 py-0.5 rounded-lg text-xs">${t.amount} ₪</span>
-                        </div>
-                        <button type="button" onclick="recordQuickSettle('${t.from}', '${t.to}', ${t.amount})" 
-                                class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs py-1.5 px-3 rounded-lg transition-all text-center self-start sm:self-auto shrink-0">
-                            סומן כהועבר ✔️
-                        </button>
-                    </div>
-                `;
-            });
-        }
-
-        renderHistoryList();
-    }
-
-    function renderHistoryList() {
-        const listContainer = document.getElementById('history-list');
-        document.getElementById('history-count').innerText = expenses.length;
-        
-        if (expenses.length === 0) {
-            listContainer.innerHTML = `
-                <div class="p-8 text-center text-slate-400 text-sm">
-                    טרם הוזנו פעולות. היסטוריית האירועים תוצג כאן ברגע שתשמרו הוצאה.
-                </div>
-            `;
+            submitBtn.innerText = "שמור הוצאה";
             return;
         }
 
-        const historyHTML = [...expenses].reverse().map(exp => {
-            const dateObj = new Date(exp.timestamp);
-            const timeStr = isNaN(dateObj) ? "" : dateObj.toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' });
-            const dateStr = isNaN(dateObj) ? "" : dateObj.toLocaleDateString('he-IL', { day: '2-digit', month: '2-digit', year: '2-digit' });
+        const payload = {
+            action: "add",
+            eventName: eventName,
+            payer: payer,
+            amount: amount,
+            participants: participants.join(",")
+        };
 
-            if (exp.type === 'expense') {
-                let payersDetails = [];
-                for (let p in exp.payers) {
-                    if(girlStyles[p]) {
-                        payersDetails.push(`<span class="font-bold inline-block border-b-2 border-${girlStyles[p].text.replace('text-', '')}/20 ${girlStyles[p].text}">${p} (${exp.payers[p]} ₪)</span>`);
-                    }
-                }
-                const payersStr = payersDetails.join(', ');
-                const participantsStr = exp.participants.map(p => girlStyles[p] ? `<span class="bg-slate-100 text-slate-700 text-xs px-2 py-0.5 rounded-md font-semibold">${p}</span>` : p).join(' ');
-
-                return `
-                    <div class="bg-slate-50 border border-slate-100 rounded-xl p-4 text-sm relative hover:bg-slate-100/50 transition-all">
-                        <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-2">
-                            <div>
-                                <h4 class="font-bold text-slate-900 text-base flex items-center gap-1">
-                                    <span>🛒</span> ${exp.description}
-                                </h4>
-                                <span class="text-xs text-slate-400">${dateStr} ${timeStr}</span>
-                            </div>
-                            <div class="flex items-center gap-2 self-end sm:self-start">
-                                <span class="bg-indigo-50 text-indigo-700 font-extrabold text-sm px-3 py-1 rounded-lg border border-indigo-100">
-                                    סה"כ: ${exp.total} ₪
-                                </span>
-                            </div>
-                        </div>
-                        <div class="space-y-2 mt-3 pt-2.5 border-t border-dashed border-slate-200 text-slate-600 leading-relaxed">
-                            <div>
-                                <strong class="text-slate-500 font-semibold">שילם / שילמו:</strong> ${payersStr}
-                            </div>
-                            <div class="flex items-center gap-1.5 flex-wrap">
-                                <strong class="text-slate-500 font-semibold shrink-0">המשתתפים באירוע:</strong>
-                                ${participantsStr}
-                            </div>
-                        </div>
-                    </div>
-                `;
-            } else if (exp.type === 'settle') {
-                const fromP = exp.participants[0];
-                const toP = exp.participants[1];
-                return `
-                    <div class="bg-emerald-50/50 border border-emerald-100 rounded-xl p-4 text-sm relative hover:bg-emerald-50 transition-all">
-                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                            <div>
-                                <h4 class="font-bold text-slate-900 flex items-center gap-1.5">
-                                    <span>🤝</span> העברת כספים ישירה
-                                </h4>
-                                <p class="text-xs text-emerald-700 mt-1">
-                                    <strong class="${girlStyles[fromP]?.text || ''}">${fromP}</strong> 
-                                    העבירה 
-                                    <strong class="font-bold">${exp.total} ₪</strong> 
-                                    ל-<strong class="${girlStyles[toP]?.text || ''}">${toP}</strong>
-                                </p>
-                                <span class="text-xs text-slate-400">${dateStr} ${timeStr}</span>
-                            </div>
-                            <div class="flex items-center gap-2 self-end sm:self-center">
-                                <span class="bg-emerald-100 text-emerald-800 font-extrabold text-xs px-2.5 py-1 rounded-lg border border-emerald-200">
-                                    איזון חוב
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            }
-        }).join('');
-
-        listContainer.innerHTML = historyHTML;
-    }
-
-    function toggleHistory() {
-        const section = document.getElementById('history-section');
-        const icon = document.getElementById('history-toggle-icon');
-        if (section.classList.contains('hidden')) {
-            section.classList.remove('hidden');
-            icon.classList.add('rotate-180');
-        } else {
-            section.classList.add('hidden');
-            icon.classList.remove('rotate-180');
-        }
-    }
-
-    function showAlert(title, message) {
-        const modal = document.getElementById('custom-alert');
-        const content = document.getElementById('alert-content');
-        document.getElementById('alert-title').innerText = title;
-        document.getElementById('alert-message').innerText = message;
-        
-        const iconEl = document.getElementById('alert-icon');
-        if(title.includes("שגיאה") || title.includes("תקשורת")) {
-            iconEl.innerText = "❌";
-            iconEl.className = "inline-flex items-center justify-center w-12 h-12 rounded-full bg-rose-50 text-rose-600 mb-4 text-xl";
-        } else {
-            iconEl.innerText = "⚠️";
-            iconEl.className = "inline-flex items-center justify-center w-12 h-12 rounded-full bg-amber-50 text-amber-600 mb-4 text-xl";
-        }
-        
-        modal.classList.remove('hidden');
-        setTimeout(() => { content.classList.remove('scale-95', 'opacity-0'); content.classList.add('scale-100', 'opacity-100'); }, 10);
-    }
-
-    function closeAlert() {
-        const modal = document.getElementById('custom-alert');
-        const content = document.getElementById('alert-content');
-        content.classList.remove('scale-100', 'opacity-100'); content.classList.add('scale-95', 'opacity-0');
-        setTimeout(() => { modal.classList.add('hidden'); }, 200);
-    }
-
-    let confirmCallback = null;
-    function showConfirm(title, message, icon, onConfirm) {
-        const modal = document.getElementById('custom-confirm');
-        const content = document.getElementById('confirm-content');
-        document.getElementById('confirm-title').innerText = title;
-        document.getElementById('confirm-message').innerText = message;
-        document.getElementById('confirm-icon').innerText = icon;
-        confirmCallback = onConfirm;
-        modal.classList.remove('hidden');
-        setTimeout(() => { content.classList.remove('scale-95', 'opacity-0'); content.classList.add('scale-100', 'opacity-100'); }, 10);
-    }
-
-    function closeConfirm() {
-        const modal = document.getElementById('custom-confirm');
-        const content = document.getElementById('confirm-content');
-        content.classList.remove('scale-100', 'opacity-100'); content.classList.add('scale-95', 'opacity-0');
-        setTimeout(() => { modal.classList.add('hidden'); }, 200);
-    }
-
-    document.getElementById('confirm-yes-btn').addEventListener('click', () => {
-        if (confirmCallback) confirmCallback();
-        closeConfirm();
+        fetch(WEB_APP_URL, {
+            method: "POST",
+            mode: "no-cors",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+        }).then(() => {
+            alert("ההוצאה נשמרה בהצלחה!");
+            document.getElementById("expenseForm").reset();
+            document.getElementById("payer").value = currentUser;
+            submitBtn.disabled = false;
+            submitBtn.innerText = "שמור הוצאה";
+            fetchData();
+        }).catch(err => {
+            alert("שגיאה בשמירת הנתונים");
+            submitBtn.disabled = false;
+            submitBtn.innerText = "שמור הוצאה";
+        });
     });
 
-    window.onload = () => {
-        initForm();
-        loadDataFromSheets();
-        // רענון אוטומטי של הנתונים כל 15 שניות כדי לראות עדכונים מבני משפחה אחרים
-        setInterval(loadDataFromSheets, 15000);
-    };
+    function fetchData() {
+        if (!currentUser) return;
+
+        fetch(WEB_APP_URL + "?action=get")
+        .then(res => res.json())
+        .then(data => {
+            allData = data;
+            renderData();
+        })
+        .catch(err => {
+            console.error("שגיאה בקבלת נתונים", err);
+        });
+    }
+
+    function renderData() {
+        const tbody = document.getElementById("tableBody");
+        tbody.innerHTML = "";
+
+        // איפוס מאזן לכל השמות ברשימה
+        let balances = {};
+        allUsers.forEach(u => balances[u] = 0);
+
+        // סינון אירועים: מי שלא חלק מהמשתתפים ולא שילם, לא יראה את השורה הזו בכלל
+        const filteredData = allData.filter(row => {
+            const rowPayer = row.payer;
+            const rowParticipants = row.participants ? row.participants.split(",") : [];
+            return (rowPayer === currentUser || rowParticipants.includes(currentUser));
+        });
+
+        if (filteredData.length === 0) {
+            document.getElementById("loadingText").innerText = "אין עדיין הוצאות גלויות עבורכם.";
+            document.getElementById("expensesTable").style.display = "none";
+            updateBalanceUI(balances);
+            return;
+        }
+
+        filteredData.forEach(row => {
+            const amount = parseFloat(row.amount);
+            const rowParticipants = row.participants ? row.participants.split(",") : [];
+            
+            // חישוב החלוקה רק לפי מי שרשום באירוע הגלוי
+            const share = amount / rowParticipants.length;
+            if (balances[row.payer] !== undefined) {
+                balances[row.payer] += amount;
+            }
+            rowParticipants.forEach(p => {
+                if (balances[p] !== undefined) {
+                    balances[p] -= share;
+                }
+            });
+
+            const tr = document.createElement("tr");
+            tr.innerHTML = `
+                <td>${row.eventName}</td>
+                <td>${row.payer}</td>
+                <td>₪${amount.toFixed(2)}</td>
+                <td>${rowParticipants.join(", ")}</td>
+            `;
+            tbody.appendChild(tr);
+        });
+
+        document.getElementById("loadingText").style.display = "none";
+        document.getElementById("expensesTable").style.display = "table";
+        
+        updateBalanceUI(balances);
+    }
+
+    function updateBalanceUI(balances) {
+        const balanceDiv = document.getElementById("balanceStatus");
+        const myBalance = balances[currentUser] || 0;
+        
+        if (Math.abs(myBalance) < 0.1) {
+            balanceDiv.innerHTML = "<strong>את/ה מאוזן/ת! אין לך חובות או יתרות לקבל.</strong>";
+        } else if (myBalance > 0) {
+            balanceDiv.innerHTML = `מגיעה לך יתרה כוללת של: <span style="color:#27ae60; font-weight:bold; font-size: 18px;">₪${myBalance.toFixed(2)}</span> משאר חברי הקבוצה.`;
+        } else {
+            balanceDiv.innerHTML = `עלייך להחזיר סך הכל: <span style="color:#e74c3c; font-weight:bold; font-size: 18px;">₪${Math.abs(myBalance).toFixed(2)}</span> לקבוצה.`;
+        }
+    }
+
+    setInterval(() => {
+        if (currentUser) fetchData();
+    }, 15000);
 </script>
+
 </body>
 </html>
